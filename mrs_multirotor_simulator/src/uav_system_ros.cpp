@@ -283,6 +283,9 @@ UavSystemRos::UavSystemRos(const UavSystemRos_CommonHandlers_t common_handlers) 
         mrs_lib::SubscriberHandler<mrs_msgs::msg::TrackerCommand>(shopts, "~/" + _uav_name_ + "/tracker_cmd", &UavSystemRos::callbackTrackerCmd, this);
   }
 
+  sh_external_force_ = mrs_lib::SubscriberHandler<geometry_msgs::msg::Vector3Stamped>(shopts, "~/" + _uav_name_ + "/external_force",
+                                                                                     &UavSystemRos::callbackExternalForce, this);
+
   // | --------------------- tf broadcaster --------------------- |
 
   if (common_handlers.transform_broadcaster) {
@@ -525,6 +528,19 @@ void UavSystemRos::crash(void) {
 
 bool UavSystemRos::hasCrashed(void) {
   return uav_system_->hasCrashed();
+}
+
+//}
+
+/* callbackExternalForce() //{ */
+
+void UavSystemRos::callbackExternalForce(const geometry_msgs::msg::Vector3Stamped::ConstSharedPtr msg) {
+  if (!is_initialized_) {
+    return;
+  }
+  RCLCPP_INFO_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000, "external force [%.1f, %.1f, %.1f] N", msg->vector.x, msg->vector.y, msg->vector.z);
+  std::scoped_lock lock(mutex_uav_system_);
+  uav_system_->applyForce(Eigen::Vector3d(msg->vector.x, msg->vector.y, msg->vector.z));
 }
 
 //}

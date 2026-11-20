@@ -12,6 +12,7 @@
 #include <mrs_lib/service_server_handler.h>
 #include <mrs_lib/mutex.h>
 #include <mrs_lib/attitude_converter.h>
+#include <geometry_msgs/msg/vector3_stamped.hpp>
 
 #include <mrs_multirotor_simulator/uav_system/uav_system.hpp>
 #include <mrs_multirotor_simulator/plugins/uav_plugin.h>
@@ -166,6 +167,9 @@ private:
   mrs_lib::SubscriberHandler<mrs_msgs::msg::HwApiVelocityHdgCmd>         sh_velocity_hdg_cmd_;
   mrs_lib::SubscriberHandler<mrs_msgs::msg::HwApiPositionCmd>            sh_position_cmd_;
   mrs_lib::SubscriberHandler<mrs_msgs::msg::TrackerCommand>              sh_tracker_cmd_;
+  // external force on the UAV [N] in the world frame (e.g. a wind gust for tests), held until the next message
+  mrs_lib::SubscriberHandler<geometry_msgs::msg::Vector3Stamped>        sh_external_force_;
+  void callbackExternalForce(const geometry_msgs::msg::Vector3Stamped::ConstSharedPtr msg);
 
   // | --------------------- service servers -------------------- |
 
